@@ -1,3 +1,5 @@
+using api.Services.IGDB;
+using IGDB;
 using Microsoft.OpenApi.Models;
 
 namespace api;
@@ -10,6 +12,17 @@ public class Program
 
         // Add services to the container.
         builder.Services.AddControllers();
+
+        // Read configuration values
+        var clientId = builder.Configuration["IGDB:ClientId"];
+        var clientSecret = builder.Configuration["IGDB:ClientSecret"];
+
+        // Register IGDBClient as a singleton using configuration values
+        builder.Services.AddSingleton<IGDBClient>(_ =>
+            IGDBClient.CreateWithDefaults(clientId, clientSecret)
+        );
+
+        builder.Services.AddScoped<IGDBGameService>();
 
         // Configure Swagger/OpenAPI
         builder.Services.AddEndpointsApiExplorer();
