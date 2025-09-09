@@ -10,11 +10,23 @@ namespace api.Controllers;
 [ApiController]
 public class IGDBController(IGDBGameService gameService) : ControllerBase
 {
-    // GET api/<IGDBController>/5
-    [HttpGet("{id}")]
+    [HttpGet("games/{id}")]
     public async Task<Game> Get(int id)
     {
         var game = await gameService.GetGameById(id);
         return game;
+    }
+
+    [HttpGet("games/search/{name}")]
+    public async Task<List<SearchResult>> Search(string name, int? limit)
+    {
+        var games = await gameService.SearchGameByName(name, limit);
+        return games;
+    }
+
+    [HttpGet("gametypes")]
+    public async Task<List<GameType>> GetGameTypes()
+    {
+        return await gameService.GetGameTypes();
     }
 }
