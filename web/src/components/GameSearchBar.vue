@@ -14,6 +14,7 @@
     const response = await fetch(`/api/IGDB/games/search/${encodeURIComponent(searchbox.value)}`)
     if (response.ok) {
       dataArray.value = await response.json()
+      console.log(dataArray.value)
     }
   }, 500)
 
@@ -35,6 +36,6 @@
   <input type="text" v-model="searchbox" @input="searchGame" />
   <br />
   <ul>
-    <li v-for="data in dataArray">{{ data.name }}<span v-if="data.year > 0"> ({{data.year}})</span></li>
+    <li v-for="data in dataArray">{{ data.name }}<span v-if="data.year > 0"> ({{data.year}})</span><div v-if="data.parentName"> {{data.parentName}}<span v-if="data.parentYear > 0"> ({{data.parentYear}})</span> {{data.gameType}}</div></li>
   </ul>
 </template>

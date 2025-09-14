@@ -10,6 +10,8 @@ public class SearchResult
     public string Name { get; set; } = string.Empty;
     public int Year { get; set; }
     public string GameType { get; set; } = string.Empty;
+    public string ParentName { get; set; } = string.Empty;
+    public int ParentYear { get; set; }
 
     [JsonConstructor]
     public SearchResult() { }
@@ -19,6 +21,8 @@ public class SearchResult
         this.Name = game.Name;
         this.Year = game.FirstReleaseDate?.Year ?? 0;
         this.GameType = game.GameType.Value.Type;
+        this.ParentName = game.ParentGame?.Value.Name ?? string.Empty;
+        this.ParentYear = game.ParentGame?.Value.FirstReleaseDate?.Year ?? 0;
     }
 }
 
@@ -38,7 +42,7 @@ public class IGDBGameService(IGDBClient client)
 
         int _limit = Math.Min(limit ?? 5, 100);
 
-        var searchResults = await client.QueryAsync<Game>(IGDBClient.Endpoints.Games, query: $"search \"{name}\"; fields id,name,first_release_date,game_type.type,parent_game.name,parent_game.game_type; where game_type = (0,1,4,8,10,9,2) & version_parent = null; limit {_limit};");
+        var searchResults = await client.QueryAsync<Game>(IGDBClient.Endpoints.Games, query: $"search \"{name}\"; fields id,name,first_release_date,game_type.type,parent_game.name,parent_game.game_type,parent_game.name,parent_game.first_release_date; where game_type = (0,1,4,8,10,9,2) & version_parent = null; limit {_limit};");
         return searchResults
             .Select(x => new SearchResult(x))
             .ToList();
