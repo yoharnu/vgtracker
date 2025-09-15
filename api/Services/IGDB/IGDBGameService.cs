@@ -9,7 +9,9 @@ public class SearchResult
     public long Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public int Year { get; set; }
+    public string Summary { get; set; } = string.Empty;
     public string GameType { get; set; } = string.Empty;
+    public string[] Platforms { get; set; } = [];
     public string ParentName { get; set; } = string.Empty;
     public int ParentYear { get; set; }
     public string coverURL { get; set; } = string.Empty;
@@ -21,11 +23,13 @@ public class SearchResult
         this.Id = game.Id ?? 0;
         this.Name = game.Name;
         this.Year = game.FirstReleaseDate?.Year ?? 0;
+        this.Summary = game.Summary ?? string.Empty;
         this.GameType = game.GameType.Value.Type;
         this.ParentName = game.ParentGame?.Value.Name ?? string.Empty;
         this.ParentYear = game.ParentGame?.Value.FirstReleaseDate?.Year ?? 0;
         if (game.Cover?.Value != null)
             this.coverURL = "https://images.igdb.com/igdb/image/upload/t_cover_small/" + game.Cover.Value.ImageId + ".jpg";
+        this.Platforms = game.Platforms?.Values.Select(p => p.Abbreviation ?? p.Name).ToArray() ?? [];
     }
 }
 
@@ -45,7 +49,7 @@ public class IGDBGameService(IGDBClient client)
 
         int _limit = Math.Min(limit ?? 5, 100);
 
-        var searchResults = await client.QueryAsync<Game>(IGDBClient.Endpoints.Games, query: $"search \"{name}\"; fields id,name,first_release_date,game_type.type,parent_game.name,parent_game.game_type,parent_game.name,parent_game.first_release_date,cover.*; where game_type = (0,1,4,8,10,9,2) & version_parent = null; limit {_limit};");
+        var searchResults = await client.QueryAsync<Game>(IGDBClient.Endpoints.Games, query: $"search \"{name}\"; fields id,name,summary,first_release_date,game_type.type,parent_game.name,parent_game.game_type,parent_game.name,parent_game.first_release_date,cover.image_id,platforms.abbreviation,platforms.name; where game_type = (0,1,4,8,10,9,2) & version_parent = null; limit {_limit};");
         return searchResults
             .Select(x => new SearchResult(x))
             .ToList();

@@ -11,8 +11,12 @@
           <img v-if="game.coverURL" :src="game.coverURL" class="searchCover" />
         </div>
         <div class="col">
-          <h5 class="card-title">{{ game.name }}<span v-if="game.year > 0"> ({{game.year}})</span></h5>
-          <small class="card-text" v-if="game.parentName"> {{game.parentName}}<span v-if="game.parentYear > 0"> ({{game.parentYear}})</span> {{game.gameType}}</small>
+          <h5 class="card-title">
+            {{ game.name }}<span v-if="game.year > 0"> ({{game.year}})</span>
+            <span v-if="game.gameType && game.parentName" class="badge bg-primary tag">{{game.gameType}}</span>
+            <span v-for="platform in game.platforms" class="badge bg-secondary tag">{{platform}}</span>
+          </h5>
+          <p class="card-text" v-if="game.summary">{{ game.summary }}</p>
         </div>
       </div>
     </div>
@@ -23,5 +27,9 @@
 <style>
   .searchCover {
     max-width: 90px;
+  }
+
+  .tag {
+    margin-left: 5px;
   }
 </style>
