@@ -12,7 +12,7 @@ public class SearchResult
     public string GameType { get; set; } = string.Empty;
     public string ParentName { get; set; } = string.Empty;
     public int ParentYear { get; set; }
-    public Cover? Cover { get; set; }
+    public string coverURL { get; set; } = string.Empty;
 
     [JsonConstructor]
     public SearchResult() { }
@@ -24,9 +24,8 @@ public class SearchResult
         this.GameType = game.GameType.Value.Type;
         this.ParentName = game.ParentGame?.Value.Name ?? string.Empty;
         this.ParentYear = game.ParentGame?.Value.FirstReleaseDate?.Year ?? 0;
-        this.Cover = game.Cover?.Value;
-        if (this.Cover != null)
-            this.Cover.Url = "https://images.igdb.com/igdb/image/upload/t_cover_small/" + this.Cover.ImageId + ".jpg";
+        if (game.Cover?.Value != null)
+            this.coverURL = "https://images.igdb.com/igdb/image/upload/t_cover_small/" + game.Cover.Value.ImageId + ".jpg";
     }
 }
 

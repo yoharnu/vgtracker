@@ -8,7 +8,7 @@
     <div class="card-body container">
       <div class="row">
         <div class="col-1">
-          <img v-if="data.cover.url" :src="data.cover.url" class="searchCover" />
+          <img v-if="data.coverURL" :src="data.coverURL" class="searchCover" />
         </div>
         <div class="col">
           <h5 class="card-title">{{ data.name }}<span v-if="data.year > 0"> ({{data.year}})</span></h5>
