@@ -13,6 +13,9 @@
     console.log('Searching for:', searchbox.value)
 
     const response = await fetch(`/api/IGDB/games/search/${encodeURIComponent(searchbox.value)}`)
+
+    dataArray.value = []
+
     if (response.ok) {
       dataArray.value = await response.json()
       console.log(dataArray.value)
@@ -36,5 +39,7 @@
 <template>
   <input type="text" v-model="searchbox" @input="searchGame" />
   <br />
-  <GameSearchResult v-for="data in dataArray" :game="data" />
+  <div>
+    <GameSearchResult v-for="data in dataArray" :game="data" />
+  </div>
 </template>
