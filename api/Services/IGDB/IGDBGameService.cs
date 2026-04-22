@@ -1,0 +1,63 @@
+﻿using IGDB;
+using IGDB.Models;
+using System.Text.Json.Serialization;
+
+namespace api.Services.IGDB;
+
+public class SearchResult
+{
+    public long Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public int Year { get; set; }
+    public string Summary { get; set; } = string.Empty;
+    public string GameType { get; set; } = string.Empty;
+    public string[] Platforms { get; set; } = [];
+    public string ParentName { get; set; } = string.Empty;
+    public int ParentYear { get; set; }
+    public string coverURL { get; set; } = string.Empty;
+
+    [JsonConstructor]
+    public SearchResult() { }
+    public SearchResult(Game game)
+    {
+        this.Id = game.Id ?? 0;
+        this.Name = game.Name;
+        this.Year = game.FirstReleaseDate?.Year ?? 0;
+        this.Summary = game.Summary ?? string.Empty;
+        this.GameType = game.GameType.Value.Type;
+        this.ParentName = game.ParentGame?.Value.Name ?? string.Empty;
+        this.ParentYear = game.ParentGame?.Value.FirstReleaseDate?.Year ?? 0;
+        if (game.Cover?.Value != null)
+            this.coverURL = "https://images.igdb.com/igdb/image/upload/t_cover_small/" + game.Cover.Value.ImageId + ".jpg";
+        this.Platforms = game.Platforms?.Values.Select(p => p.Abbreviation ?? p.Name).ToArray() ?? [];
+    }
+}
+
+public class IGDBGameService(IGDBClient client)
+{
+    public async Task<Game> GetGameById(int id)
+    {
+        var games = await client.QueryAsync<Game>(IGDBClient.Endpoints.Games, query: $"fields id,name,platforms.*,parent_game,genres.name,game_status.*,release_dates.date,release_dates.human,release_dates.platform.*,release_dates.status.*,summary,websites.url,websites.type.type; where id = {id};");
+        var game = games.First();
+
+        return game;
+    }
+
+    public async Task<List<SearchResult>> SearchGameByName(string name, int? limit = null)
+    {
+        if (name.Length < 2 || limit < 1) return [];
+
+        int _limit = Math.Min(limit ?? 5, 100);
+
+        var searchResults = await client.QueryAsync<Game>(IGDBClient.Endpoints.Games, query: $"search \"{name}\"; fields id,name,summary,first_release_date,game_type.type,parent_game.name,parent_game.game_type,parent_game.name,parent_game.first_release_date,cover.image_id,platforms.abbreviation,platforms.name; where game_type = (0,1,4,8,10,9,2) & version_parent = null; limit {_limit};");
+        return searchResults
+            .Select(x => new SearchResult(x))
+            .ToList();
+    }
+
+    public async Task<List<GameType>> GetGameTypes()
+    {
+        var results = await client.QueryAsync<GameType>(IGDBClient.Endpoints.GameTypes, query: "fields *; limit 100;");
+        return results.ToList();
+    }
+}
